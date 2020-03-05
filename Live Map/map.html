@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Real-time GPS Tracker</title>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.19.0.min.js"></script>
+    <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </head>
+  <body>
+      <div class="bg"></div>
+      <div class="bg-others">
+          <div class="container">
+              <h1>Realtime GPS Tracker and LOB Plotter for SAR UAV Project</h1>
+              <center><hr style="height:2px; border:none; color:#ffffff; background-color:#ffffff; width:35%; margin: 0 auto 0 auto;"></center>
+              <p>by Sharome Burton & Bryan Heilman (with some help from Kuwin Wyke)</p>
+              <center><button class="btn btn-success col-sm-3" id="action">Start Tracking</button></center><br>
+              <center><div id="map-canvas"></div></center>
+          </div>
+      </div>
+
+      <script>
+          window.lat = 33.8736094;
+          window.lng = -98.521545;
+
+          var map;  // Map by Google to be drawn on
+          var mark; // Map Marker
+          var lineCoords = [];  // Array of flight path coordinates, constantly being filled
+
+          var initialize = function () {
+              map = new google.maps.Map(document.getElementById('map-canvas'), { center: { lat: lat, lng: lng }, zoom: 16 });
+              mark = new google.maps.Marker({ position: { lat: lat, lng: lng }, map: map });
+              
+          };
+
+          window.initialize = initialize;
+
+          // Re-draws map after each event of receiving data from PubNub server
+          var redraw = function (payload) {
+              if (payload.message.lat) {
+                  lat = payload.message.lat;    // Latitude
+                  lng = payload.message.lng;    // Longitude
+                  doa = payload.message.doa;    // Direction of Arrival
+                  head = payload.message.head;  // Aircraft Heading
+
+                  // map.setCenter({ lat: lat, lng: lng, alt: 0 }); // Re-centers map on current coordinates
+                  mark.setPosition({ lat: lat, lng: lng, alt: 0 });
+
+                  lineCoords.push(new google.maps.LatLng(lat, lng));    // adds current coordinates to array of flight path coords
+
+                  // Updates line of of flight path
+                  var lineCoordinatesPath = new google.maps.Polyline({
+                      path: lineCoords,
+                      geodesic: true,
+                      strokeColor: '#2E10FF'
+                  });
+                  // Start-point (current coords) and end-point (based on DOA and Heading) of Line of Bearing
+                  var LOBCoords = [
+                      { lat: lat, lng: lng },
+                      { lat: lat + (0.15 * Math.cos((doa * Math.PI / 180) + (head * Math.PI / 180))), lng: lng + (0.15 * Math.sin((doa * Math.PI / 180) + (head * Math.PI / 180))) }
+                  ];
+                  // Updates line of bearing
+                  var LOBLine = new google.maps.Polyline({
+                      path: LOBCoords,
+                      geodesic: true,
+                      strokeColor: '#FF0000',
+                      strokeOpacity: 1.0,
+                      strokeWeight: 2
+                  });
+
+                  lineCoordinatesPath.setMap(map);  // Draws flight path onto map
+                  LOBLine.setMap(map); // Draws LOB onto map
+              }
+          };
+
+          var pnChannel = "raspi-tracker";
+
+          var pubnub = new PubNub({
+              publishKey: 'pub-c-28e6aa14-b430-4a71-ac2c-967cd14eed1b',
+              subscribeKey: 'sub-c-7f2edcde-5668-11ea-b828-26d2a984a2e5'
+          });
+
+          document.querySelector('#action').addEventListener('click', function () {
+              var text = document.getElementById("action").textContent;
+              if (text == "Start Tracking") {
+                  pubnub.subscribe({ channels: [pnChannel] });
+                  pubnub.addListener({ message: redraw });
+                  document.getElementById("action").classList.add('btn-danger');
+                  document.getElementById("action").classList.remove('btn-success');
+                  document.getElementById("action").textContent = 'Stop Tracking';
+              }
+              else {
+                  pubnub.unsubscribe({ channels: [pnChannel] });
+                  document.getElementById("action").classList.remove('btn-danger');
+                  document.getElementById("action").classList.add('btn-success');
+                  document.getElementById("action").textContent = 'Start Tracking';
+              }
+          });
+      </script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyDgRx6G543HgL8_Eb6RiVespcYG5_62dEo&callback=initialize"></script>
+  </body>
+</html>

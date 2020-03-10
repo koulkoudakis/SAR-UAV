@@ -10,6 +10,6 @@ To achieve a reliable calculation of the angle of incidence or azimuth of a radi
 The functional RDF will run from a Linux-based OS on a laptop, as a precursor to
 miniaturized version which can be mounted on a small COTS air frame.
 
-Technologies used: Python 3, GNURadio, SOLIDWORKS, Linux, Raspberry Pi
+Technologies used: Python 3, JavaScript, GNURadio, SOLIDWORKS, Linux, Raspberry Pi
 
 

@@ -64,12 +64,31 @@ while True:
         gps = "Latitude=" + txlat + " and Longitude=" + txlng
         print(gps)
         
-        # TX: Read Direction of Arrival and Heading
-        txdoa = 90.00000 # DOA hard-coded to 90 degrees (off right wing)
-        txhead += 3.000000 # Aircraft turning clockwise at 3 degrees per iteration
+        # TX: Read Data from KerberosSDR
+        
+        try:
+            with open("/ram/DOA_value.html",mode = 'r') as DOA:
+                
+                txdoa = DOA.read()[12:15]  # DOA / degrees
+                print('DOA: ' + txdoa + '\n') 
+                DOA.seek(0)
+                txconf = DOA.read()[28:31]  # Confidence / percentage
+                print('Confidence: ' + txconf + '\n') 
+                DOA.seek(0)
+                txpwr = DOA.read()[44:52]  # Signal power / decibels
+                print('Power: ' + txpwr + '\n') 
+                DOA.seek(0)
+                            
+        except FileNotFoundError as e1:
+            print('DOA: Check file name or location\n\n')
+            
+            
+        # TX: Read Heading
+        
+        txhead += 0 # Aircraft hard-coded to maintain initial heading (north)
 
-        # TX: Converting data to string by concatenation
-        air_packet = txlat + txlng + str(txdoa).ljust(8, '0')[0:8] + str(txhead).ljust(8, '0')[0:8]
+        # TX: Converting data to string by concatenation (string lengths: lat:8, lng:8, doa:3, conf:3, pow:8, head:8)
+        air_packet = txlat + txlng + txdoa + txconf + txpwr + str(txhead).ljust(8, '0')[0:8]
 
         # TX: Sending data via LoRa as bytes
         rfm9x.send(bytearray(air_packet, 'utf-8'))
@@ -91,7 +110,7 @@ while True:
         # time.sleep(.25)
 
     # RX: Check for acknowledgement from ground station
-    packet = rfm9x.receive(timeout=0.1)
+    packet = rfm9x.receive(timeout=0.5)
     if packet is None:
         display.show()
         display.fill(0)

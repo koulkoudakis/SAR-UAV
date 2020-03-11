@@ -97,8 +97,10 @@ while True:
         prev_packet = packet.decode('utf-8')
         lat = float(prev_packet[0:8])
         lng = float(prev_packet[8:16])
-        doa = float(prev_packet[16:24])
-        head = float(prev_packet[24:32])
+        doa = float(prev_packet[16:19])
+        conf = float(prev_packet[19:22])
+        pwr = float(prev_packet[22:30])
+        head = float(prev_packet[30:38])
         
         # RX: Acquire received signal strength
         rssi = str(rfm9x.rssi)
@@ -115,7 +117,10 @@ while True:
                 'lat': lat,
                 'lng': lng,
                 'doa': doa,
+                'conf': conf,
+                'pwr': pwr,
                 'head': head,
+                'rssi': rssi
             }).sync()
             print("publish timetoken: %d" % envelope.result.timetoken)
         except PubNubException as e:

@@ -1,5 +1,9 @@
 """
 Author: Sharome Burton for SAR-UAV Project
+File: air.py
+Description: This program runs on the Raspberry Pi onboard the SAR UAV to act as the onboard signal processor and transceiver
+            for the aircraft, relaying information to and from the ground station.
+
 """
 # Import Python System Libraries
 import time
@@ -34,7 +38,7 @@ height = display.height
 CS = DigitalInOut(board.CE1)
 RESET = DigitalInOut(board.D25)
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0) # 915 Mhz
+rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0) # 915 MHz
 rfm9x.tx_power = 23 # Maximum 
 prev_packet = None
 

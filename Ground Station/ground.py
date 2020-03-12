@@ -1,5 +1,9 @@
 """
 Author: Sharome Burton for SAR-UAV Project
+File: ground.py
+Description: This program runs on the Raspberry Pi ground station as a transceiver,
+            relaying information to and from the aircraft and to the live mapping
+            application.
 """
 
 # Import Python System Libraries
@@ -95,12 +99,12 @@ while True:
     else:
         # RX: Converting packet from bytes
         prev_packet = packet.decode('utf-8')
-        lat = float(prev_packet[0:8])
-        lng = float(prev_packet[8:16])
-        doa = float(prev_packet[16:19])
-        conf = float(prev_packet[19:22])
-        pwr = float(prev_packet[22:30])
-        head = float(prev_packet[30:38])
+        lat = float(prev_packet[0:8])   # Latitude
+        lng = float(prev_packet[8:16])  # Longitude
+        doa = float(prev_packet[16:19])  # Direction of Arrival / degrees
+        conf = float(prev_packet[19:22])    # DOA Estimation Confidence / percentage
+        pwr = float(prev_packet[22:30])     # Signal Power / decibels
+        head = float(prev_packet[30:38])    # Heading / degrees
         
         # RX: Acquire received signal strength
         rssi = str(rfm9x.rssi)

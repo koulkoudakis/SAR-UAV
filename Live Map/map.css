@@ -17,7 +17,7 @@ body, html {
 .bg-others {
   background-color: rgb(0,0,0); 
   background-color: rgba(0,0,0, 0.4); 
-  color: white;
+  color: goldenrod;
   font-weight: bold;
   text-align: center;
   border: 3px solid #f1f1f1;

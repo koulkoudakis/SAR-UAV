@@ -24,13 +24,38 @@
           window.lng = -98.521545;
 
           var map;  // Map by Google to be drawn on
-          var mark; // Map Marker
+          var mark; // SAR UAV Map Marker
+          var gsmark; // Ground Station Map Marker
+          var ginfowindow; // Ground Station Data Ticker
+          var contentString;
           var lineCoords = [];  // Array of flight path coordinates, constantly being filled
 
           var initialize = function () {
               map = new google.maps.Map(document.getElementById('map-canvas'), { center: { lat: lat, lng: lng }, zoom: 16 });
-              mark = new google.maps.Marker({ position: { lat: lat, lng: lng }, map: map });
-              
+              mark = new google.maps.Marker({ position: { lat: lat, lng: lng }, map: map, title: 'SAR UAV' });
+
+              gsmark = new google.maps.Marker({ position: { lat: 33.8736094, lng: -98.521545 }, map: map, title: 'Ground Station' });
+
+              // contentString = '<div id="content">' +
+              //     '<div id="siteNotice">' +
+              //     '</div>' +
+              //     '<h1 id="firstHeading" class="firstHeading">Ground Station</h1>' +
+              //     '<div id="bodyContent">' +
+              //     '<p><b>Ground Station</b>, etc...' +
+              //     '</p>' +
+              //     '<p>Latitude: ' + lat.toString() + '  Longitude:  ' + lng.toString() + '  DOA:  ' + doa.toString() +
+              //     '  Confidence:  ' + conf.toString() + '  Power:  ' + pwr.toString() + '  Heading:  ' + head.toString() +                  
+              //     '</p>' +
+              //     '</div>' +
+              //     '</div>';
+
+              ginfowindow = new google.maps.InfoWindow({
+                  content: contentString
+              });
+
+              gsmark.addListener('click', function () {
+                  ginfowindow.open(map, gsmark);
+              });
           };
 
           window.initialize = initialize;
@@ -41,6 +66,8 @@
                   lat = payload.message.lat;    // Latitude
                   lng = payload.message.lng;    // Longitude
                   doa = payload.message.doa;    // Direction of Arrival
+                  conf = payload.message.conf   // DOA Estimation Confidence
+                  pwr = payload.message.pwr     // Signal Power
                   head = payload.message.head;  // Aircraft Heading
 
                   // map.setCenter({ lat: lat, lng: lng, alt: 0 }); // Re-centers map on current coordinates
@@ -67,6 +94,19 @@
                       strokeOpacity: 1.0,
                       strokeWeight: 2
                   });
+
+                  contentString = '<div id="content">' +
+                      '<div id="siteNotice">' +
+                      '</div>' +
+                      '<h1 id="firstHeading" class="firstHeading">Ground Station</h1>' +
+                      '<div id="bodyContent">' +
+                      '<p><b>Ground Station</b>, etc...' +
+                      '</p>' +
+                      '<p>Latitude: ' + lat.toString() + '  Longitude:  ' + lng.toString() + '  DOA:  ' + doa.toString() +
+                      '  Confidence:  ' + conf.toString() + '  Power:  ' + pwr.toString() + '  Heading:  ' + head.toString() +
+                      '</p>' +
+                      '</div>' +
+                      '</div>';
 
                   lineCoordinatesPath.setMap(map);  // Draws flight path onto map
                   LOBLine.setMap(map); // Draws LOB onto map

@@ -36,18 +36,18 @@
 
               gsmark = new google.maps.Marker({ position: { lat: 33.8736094, lng: -98.521545 }, map: map, title: 'Ground Station' });
 
-              // contentString = '<div id="content">' +
-              //     '<div id="siteNotice">' +
-              //     '</div>' +
-              //     '<h1 id="firstHeading" class="firstHeading">Ground Station</h1>' +
-              //     '<div id="bodyContent">' +
-              //     '<p><b>Ground Station</b>, etc...' +
-              //     '</p>' +
-              //     '<p>Latitude: ' + lat.toString() + '  Longitude:  ' + lng.toString() + '  DOA:  ' + doa.toString() +
-              //     '  Confidence:  ' + conf.toString() + '  Power:  ' + pwr.toString() + '  Heading:  ' + head.toString() +                  
-              //     '</p>' +
-              //     '</div>' +
-              //     '</div>';
+              contentString = '<div id="content">' +
+                  '<div id="siteNotice">' +
+                  '</div>' +
+                  '<h1 id="firstHeading" class="firstHeading">Ground Station</h1>' +
+                  '<div id="bodyContent">' +
+                  '<p><b>Ground Station</b>, received values, etc...' +
+                  '</p>' +
+                  '<p>Latitude: ' + '  Longitude:  ' + '  DOA:  ' +
+                  '  Confidence:  ' + '  Power:  ' + '  Heading:  ' +                  
+                  '</p>' +
+                  '</div>' +
+                  '</div>';
 
               ginfowindow = new google.maps.InfoWindow({
                   content: contentString
@@ -95,6 +95,8 @@
                       strokeWeight: 2
                   });
 
+                  ginfowindow.close(map, gsmark);
+
                   contentString = '<div id="content">' +
                       '<div id="siteNotice">' +
                       '</div>' +
@@ -107,6 +109,12 @@
                       '</p>' +
                       '</div>' +
                       '</div>';
+
+                  // ginfowindow = new google.maps.InfoWindow({
+                  //     content: contentString
+                  // });
+
+                  ginfowindow.open(map, gsmark);
 
                   lineCoordinatesPath.setMap(map);  // Draws flight path onto map
                   LOBLine.setMap(map); // Draws LOB onto map

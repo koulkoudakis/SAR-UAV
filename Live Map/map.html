@@ -27,14 +27,25 @@
           var mark; // SAR UAV Map Marker
           var gsmark; // Ground Station Map Marker
           var ginfowindow; // Ground Station Data Ticker
-          var contentString;
+          var contentString;    // Info box
           var lineCoords = [];  // Array of flight path coordinates, constantly being filled
+          var HeadCoords = [];  // Coordinates for heading line
 
           var initialize = function () {
               map = new google.maps.Map(document.getElementById('map-canvas'), { center: { lat: lat, lng: lng }, zoom: 16 });
               mark = new google.maps.Marker({ position: { lat: lat, lng: lng }, map: map, title: 'SAR UAV' });
 
+              // Ground Station Marker
               gsmark = new google.maps.Marker({ position: { lat: 33.8736094, lng: -98.521545 }, map: map, title: 'Ground Station' });
+
+              // Heading Line (only one will appear on map at a time, on current location of marker)
+              var HeadLine = new google.maps.Polyline({
+                  path: HeadCoords,
+                  geodesic: true,
+                  strokeColor: '#0000FF',
+                  strokeOpacity: 1.0,
+                  strokeWeight: 2
+              });
 
               contentString = '<div id="content">' +
                   '<div id="siteNotice">' +
@@ -70,8 +81,9 @@
                   pwr = payload.message.pwr     // Signal Power
                   head = payload.message.head;  // Aircraft Heading
 
+
                   // map.setCenter({ lat: lat, lng: lng, alt: 0 }); // Re-centers map on current coordinates
-                  mark.setPosition({ lat: lat, lng: lng, alt: 0 });
+                  mark.setPosition({ lat: lat, lng: lng, alt: 0 }); // Sets marker to current aircraft location
 
                   lineCoords.push(new google.maps.LatLng(lat, lng));    // adds current coordinates to array of flight path coords
 
@@ -94,6 +106,23 @@
                       strokeOpacity: 1.0,
                       strokeWeight: 2
                   });
+
+                  HeadLine.setMap(null);    // Clears previous heading line
+
+                  // Start-point (current coords) and end-point (based on Heading) of Heading Line
+                  var HeadCoords = [
+                      { lat: lat, lng: lng },
+                      { lat: lat + (0.01 * Math.cos((head * Math.PI / 180))), lng: lng + (0.01 * Math.sin((head * Math.PI / 180))) }
+                  ];
+
+                  // // Updates Heading Line
+                  // var HeadLine = new google.maps.Polyline({
+                  //     path: HeadCoords,
+                  //     geodesic: true,
+                  //     strokeColor: '#0000FF',
+                  //     strokeOpacity: 1.0,
+                  //     strokeWeight: 2
+                  // });
 
                   ginfowindow.close(map, gsmark);
 
@@ -118,6 +147,7 @@
 
                   lineCoordinatesPath.setMap(map);  // Draws flight path onto map
                   LOBLine.setMap(map); // Draws LOB onto map
+                  HeadLine.setMap(map); // Draws heading line onto map
               }
           };
 

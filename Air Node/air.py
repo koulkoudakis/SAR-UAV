@@ -43,9 +43,13 @@ rfm9x.tx_power = 23 # Maximum
 prev_packet = None
 
 # Configure GPS Receiver
-port = "/dev/ttyACM0"       # Serial port of GPS Receiver
-ser = serial.Serial(port, baudrate=9600, timeout=0.5)
+port1 = "/dev/ttyACM0"       # Serial port of GPS Receiver
+gps = serial.Serial(port1, baudrate=9600, timeout=0.5)
 dataout = pynmea2.NMEAStreamReader()
+
+# Configure IMU
+port2 = "/dev/ttyACM1"    # Serial port of Inertial Measurement Unit
+imu = serial.Serial(port2, baudrate=115200, timeout=0.5)
 
 doa, head = 0.0, 0.0  # Line of Bearing and Heading of Aircraft initialized at zero
 txdoa, txhead = 0.0, 0.0
@@ -57,16 +61,21 @@ while True:
     packet = None
 
     # TX: GPS data
-    newdata=ser.readline()
+    newdata=gps.readline()
     newdata = newdata.decode("utf-8")
+    
+    # TX: Read Inertial Measurement Unit data
+    if (imu.in_waiting > 0):
+        imu_data = str(imu.readline(), "utf-8").split(',')
+        print("tick" + '\n')
 
     # TX: Parsing data from GPS receiver
     if newdata[0:6] == "$GPRMC":
         newmsg = pynmea2.parse(newdata)
         txlat = str(newmsg.latitude).ljust(8, '0')[0:8] # Latitude to be transferred 8 chars long
         txlng = str(newmsg.longitude).ljust(8, '0')[0:8] # Longitude to be transferred 8 chars long
-        gps = "Latitude=" + txlat + " and Longitude=" + txlng
-        print(gps)
+        coords = "Latitude=" + txlat + " and Longitude=" + txlng
+        print(coords)
         
         # TX: Read Data from KerberosSDR
         
@@ -86,10 +95,16 @@ while True:
         except FileNotFoundError as e1:
             print('DOA: Check file name or location\n\n')
             
-            
-        # TX: Read Heading
+        # TX: Store Aircraft Heading
         
-        txhead += 0 # Aircraft hard-coded to maintain initial heading (north)
+        if float(imu_data[-1]) < 0:
+            txhead = str(float(imu_data[-1]) + 360)   # Converting negative angles
+        else:
+            txhead = imu_data[-1]
+            
+        print("Heading: " + txhead + '\n')
+        
+        # Aircraft hard-coded to maintain initial heading (north)
 
         # TX: Converting data to string by concatenation (string lengths: lat:8, lng:8, doa:3, conf:3, pow:8, head:8)
         air_packet = txlat + txlng + txdoa + txconf + txpwr + str(txhead).ljust(8, '0')[0:8]
@@ -114,7 +129,7 @@ while True:
         # time.sleep(.25)
 
     # RX: Check for acknowledgement from ground station
-    packet = rfm9x.receive(timeout=0.5)
+    packet = rfm9x.receive(timeout=0.1)
     if packet is None:
         display.show()
         display.fill(0)

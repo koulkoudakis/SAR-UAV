@@ -1,14 +1,13 @@
 # SAR-UAV
 Co-author: Bryan Heilman
 
-This project has an overall aim of developing a light aerial search and rescue platform by integrating a radio direction-finder (RDF) into a small unmanned aerial vehicle (UAV) using commercial, off-the-shelf (COTS) components.The finished platform will be able to locate emergency locator transmitter (ELT) beacons from the air.
+This project has an overall aim of developing a light, aerial search and rescue platform by integrating a radio direction-finder (RDF) into a small unmanned aerial vehicle (UAV) using commercial, off-the-shelf (COTS) components. The finished platform will be able to locate emergency locator transmitter (ELT) beacons from the air.
 
-At this phase of the project, the RDF is being built using a combination of four COTS software-defined radio (SDR) receivers, COTS antennas, and a Linux-based open source SDR development platform, GNU Radio.
+At this phase of the project, the RDF system is being built using a four-channel COTS software-defined radio (SDR) receiver, an open-source signal processing script, and COTS antennas. Data will be relayed between the ground station and the aircraft using LoRa (Long Range) transceiver modules operating on the license-free 915 MHz radio band.
 
-To achieve a reliable calculation of the angle of incidence or azimuth of a radio signal source, the RDF we develop will use the method of phase interferometry. This method involves the arrangement of two or more phase-coherent receiving elements at a known distance from each other, which are tuned in to and excited by the signal of interest (121.5MHz or 243MHz for ELT’s). Since each element receives the wave front of the signal at a marginally different time, the relative phase and the phase difference of the signal between each element can be calculated, and a trigonometric function can be used to estimate the angle of incidence of the wave front. The reliable calculation of phase difference will involve the conversion of the COTS SDR Receivers into phase-coherent versions by synchronizing each device to the same physical oscillator.
+To achieve a reliable estimation of the angle of incidence or direction of arrival (DOA) of a signal source, the RDF we build will use the method of phase interferometry. This method involves the arrangement of two or more phase-coherent receiving elements at a known distance from each other, which are tuned in to the frequency of interest. Since each element receives the wave front of the signal at a marginally different time, the phase difference of the signal between each element can be calculated, and one of a number of signal processing algorithms (MUSIC, MEM, Capon, or Bartlett) can be applied to estimate the DOA.
 
-The functional RDF will run from a Linux-based OS on a laptop, as a precursor to
-miniaturized version which can be mounted on a small COTS air frame.
+Using the GPS coordinates of the aircraft, its compass heading, and the DOA, lines of bearing will be plotted on a geographic map in real-time to indicate the estimated location of the ELT using software developed specifically for the project.
 
 Technologies used: Python 3, JavaScript, GNURadio, SOLIDWORKS, Linux, Raspberry Pi
 

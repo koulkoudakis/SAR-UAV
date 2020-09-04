@@ -72,7 +72,8 @@ rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
 rfm9x.tx_power = 23
 prev_packet = None
 
-## port="/dev/ttyACM0"       # Serial port of GPS Receiver
+# Serial port of GPS Receiver
+## port="/dev/ttyACM0"
 ## ser=serial.Serial(port, baudrate=9600, timeout=0.5)
 ## dataout = pynmea2.NMEAStreamReader()
 
